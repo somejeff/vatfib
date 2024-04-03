@@ -1,0 +1,16 @@
+{
+  "name": "vatfib",
+  "version": "1.0.0",
+  "description": "Airport-centric VATSIM Flight Information Boards with gate assignments",
+  "main": "index.js",
+  "repository": "https://github.com/somejeff/vatfib.git",
+  "author": "Jeff Lee <somejeff@gmail.com>",
+  "private": false,
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}
