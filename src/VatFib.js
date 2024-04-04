@@ -26,12 +26,41 @@ class VatFib {
     if (config && typeof config === "object") {
       this.config = { ...this.config, ...config };
     }
-
+    // If there are braces (ranges) in ther terminals and gates, expand the arrays
+    this.expandRangedTerminals();
     //
     this.flights = {
       arrivals: [],
       departures: [],
     };
+  }
+
+  expandRangedTerminals() {
+    this.config.terminals = [...this.config.terminals].reduce(
+      (list, terminal) => {
+        if (terminal.name.indexOf("{") == -1) {
+          list.push(terminal);
+          return list;
+        }
+
+        // "prefix{start..end}suffix"
+        const pattern = terminal.name.match(/(.*)?\{(.*)\.\.(.*)\}(.*)?/);
+        const prefix = pattern[1]; // may be undefined, keep leading/trailing spaces
+        const start = pattern[2]; // may have leading 0s, so keep as string
+        const end = pattern[3]; // may have leading 0s
+        const suffix = pattern[4]; // may be undefined, keep leading/trailing spaces
+        const count = Number.parseInt(end) - Number.parseInt(start) + 1;
+        for (let i = 0; i < count; i++) {
+          let digit = `${Number.parseInt(start) + i}`;
+          digit = digit.padStart(start.length, "0");
+          terminal.name = `${prefix || ""}${digit}${suffix || ""}`;
+          list.push({...terminal});
+        }
+
+        return list;
+      },
+      []
+    );
   }
 
   setFlights(flights) {
@@ -49,7 +78,7 @@ class VatFib {
 
     this.flights.arrivals?.forEach((flight) => {
       const selectedTerminal = this.selectTerminal(flight);
-      const selectedGate = this.selectGate(flight,selectedTerminal);
+      const selectedGate = this.selectGate(flight, selectedTerminal);
       flight.terminal = selectedTerminal.name;
       flight.gate = selectedGate.name;
     });
@@ -77,7 +106,6 @@ class VatFib {
     return availableTerminals[flightHash % availableTerminals.length];
   }
 
-  
   /**
    * Selects an appropriate gate from the passed in terminal for the given flight
    *
@@ -118,8 +146,8 @@ class VatFib {
       hash = (hash << 5) - hash + inputString.charCodeAt(i);
       hash |= 0; // Convert to 32-bit integer
     }
-    flight.hash = Math.abs(hash) // Ensure non-negative value and cache for reuse
-    return flight.hash; 
+    flight.hash = Math.abs(hash); // Ensure non-negative value and cache for reuse
+    return flight.hash;
   }
 }
 module.exports = VatFib;

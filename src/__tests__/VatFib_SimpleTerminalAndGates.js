@@ -122,7 +122,6 @@ describe("Custom Terminal and Gate", () => {
   });
 });
 
-
 describe("Multiple terminals with a default gate", () => {
   const fib = new VatFib({
     terminals: [
@@ -174,13 +173,12 @@ describe("Multiple terminals with a default gate", () => {
     // All flights gate A or B
     fib.flights.departures.forEach((flight) => {
       expect(flight.terminal).toMatch(/T1|T2/);
-      expect(flight.gate).toMatch(/[AB]/); 
+      expect(flight.gate).toMatch(/[AB]/);
     });
     fib.flights.arrivals.forEach((flight) => {
       expect(flight.terminal).toMatch(/T1|T2/);
       expect(flight.gate).toMatch(/[AB]/);
     });
-
   });
 
   it("should reproduce the same terminal and gate", () => {
@@ -246,16 +244,12 @@ describe("Multiple terminals with a default gate", () => {
       ],
     });
     // remove the last flight
-    fib.flights.departures.pop()
-    fib.flights.arrivals.pop()
+    fib.flights.departures.pop();
+    fib.flights.arrivals.pop();
     // the first flights should have not changed terminals/gates
     expect(fib.flights).toMatchObject(firstRun);
-
-    
-
   });
 });
-
 
 describe("Multiple Gates at the main terminal", () => {
   const fib = new VatFib({
@@ -303,14 +297,12 @@ describe("Multiple Gates at the main terminal", () => {
     // All flights gate A or B
     fib.flights.departures.forEach((flight) => {
       expect(flight.terminal).toBe("T1");
-      expect(flight.gate).toMatch(/[AB]/); 
+      expect(flight.gate).toMatch(/[AB]/);
     });
     fib.flights.arrivals.forEach((flight) => {
       expect(flight.terminal).toBe("T1");
       expect(flight.gate).toMatch(/[AB]/);
     });
-
-    
   });
 
   it("should reproduce the same terminal and gate", () => {
@@ -376,15 +368,12 @@ describe("Multiple Gates at the main terminal", () => {
       ],
     });
     // remove the last flight
-    fib.flights.departures.pop()
-    fib.flights.arrivals.pop()
+    fib.flights.departures.pop();
+    fib.flights.arrivals.pop();
     // the first flights should have not changed terminals/gates
     expect(fib.flights).toMatchObject(firstRun);
   });
 });
-
-
-
 
 describe("Multiple Gates at multiple terminals", () => {
   const fib = new VatFib({
@@ -440,17 +429,15 @@ describe("Multiple Gates at multiple terminals", () => {
       ],
     });
 
-    // All flights gate A or B
+    // All flights gate A thru D
     fib.flights.departures.forEach((flight) => {
-      expect(flight.terminal).toMatch(/T1|T2/); 
-      expect(flight.gate).toMatch(/[ABCD]/); 
-    });
-    fib.flights.arrivals.forEach((flight) => {
-      expect(flight.terminal).toMatch(/T1|T2/); 
+      expect(flight.terminal).toMatch(/T1|T2/);
       expect(flight.gate).toMatch(/[ABCD]/);
     });
-
-    
+    fib.flights.arrivals.forEach((flight) => {
+      expect(flight.terminal).toMatch(/T1|T2/);
+      expect(flight.gate).toMatch(/[ABCD]/);
+    });
   });
 
   it("should reproduce the same terminal and gate", () => {
@@ -516,9 +503,121 @@ describe("Multiple Gates at multiple terminals", () => {
       ],
     });
     // remove the last flight
-    fib.flights.departures.pop()
-    fib.flights.arrivals.pop()
+    fib.flights.departures.pop();
+    fib.flights.arrivals.pop();
     // the first flights should have not changed terminals/gates
     expect(fib.flights).toMatchObject(firstRun);
+  });
+});
+
+describe("Multiple duplicate terminals and gates", () => {
+  it("should allow duplicate terminals", () => {
+    const fib = new VatFib({
+      terminals: [
+        {
+          name: "T1",
+          gates: [
+            {
+              name: "A",
+            },
+          ],
+        },
+        {
+          name: "T1",
+          gates: [
+            {
+              name: "B",
+            },
+          ],
+        },
+      ],
+    });
+    fib.setFlights({
+      departures: [
+        {
+          callsign: "F1",
+        },
+        {
+          callsign: "F2",
+        },
+        {
+          callsign: "F3",
+        },
+      ],
+      arrivals: [
+        {
+          callsign: "F1",
+        },
+        {
+          callsign: "F2",
+        },
+        {
+          callsign: "F3",
+        },
+      ],
+    });
+     // All flights gate A or B at T1
+     fib.flights.departures.forEach((flight) => {
+      expect(flight.terminal).toMatch("T1");
+      expect(flight.gate).toMatch(/[AB]/);
+    });
+    fib.flights.arrivals.forEach((flight) => {
+      expect(flight.terminal).toBe("T1");
+      expect(flight.gate).toMatch(/[AB]/);
+    });
+  });
+
+  it("should allow duplicate gates within a terminal", () => {
+    const fib = new VatFib({
+      terminals: [
+        {
+          name: "T1",
+          gates: [
+            {
+              name: "A",
+            },
+            {
+              name: "A",
+            },
+            {
+              name: "A",
+            },
+          ],
+        },
+      ],
+    });
+    fib.setFlights({
+      departures: [
+        {
+          callsign: "F1",
+        },
+        {
+          callsign: "F2",
+        },
+        {
+          callsign: "F3",
+        },
+      ],
+      arrivals: [
+        {
+          callsign: "F1",
+        },
+        {
+          callsign: "F2",
+        },
+        {
+          callsign: "F3",
+        },
+      ],
+    });
+     // All flights gate A or B at T1
+     fib.flights.departures.forEach((flight) => {
+      expect(flight.terminal).toBe("T1");
+      expect(flight.gate).toBe("A")
+    });
+    fib.flights.arrivals.forEach((flight) => {
+      expect(flight.terminal).toBe("T1");
+      expect(flight.gate).toBe("A")
+    });
   });
 });
