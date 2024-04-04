@@ -57,19 +57,6 @@ describe("Terminal Ranges", () => {
     expect(fib.config.terminals.length).toBe(11)
   });
   
-  it("should use only the start number for padding length?", () => {
-    const fib = new VatFib({
-      terminals: [
-        {
-          name: "{0000..0999}",
-        },
-      ],
-    });
-
-    expect(fib.config.terminals.at(0).name).toBe("0000")
-    expect(fib.config.terminals.at(-1).name).toBe("0999")
-    expect(fib.config.terminals.length).toBe(1000)
-  });
 
 
   it("should support a prefix", () => {

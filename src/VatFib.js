@@ -28,6 +28,7 @@ class VatFib {
     }
     // If there are braces (ranges) in ther terminals and gates, expand the arrays
     this.expandRangedTerminals();
+    this.expandRangedGates();
     //
     this.flights = {
       arrivals: [],
@@ -53,14 +54,48 @@ class VatFib {
         for (let i = 0; i < count; i++) {
           let digit = `${Number.parseInt(start) + i}`;
           digit = digit.padStart(start.length, "0");
-          terminal.name = `${prefix || ""}${digit}${suffix || ""}`;
-          list.push({...terminal});
+          const entry = { ...terminal };
+          entry.name = `${prefix || ""}${digit}${suffix || ""}`;
+          list.push(entry);
         }
 
         return list;
       },
       []
     );
+  }
+
+  expandRangedGates() {
+    this.config.terminals.forEach((terminal) => {
+      // No gates?
+      if (!terminal.gates) {
+        return;
+      }
+      const gates = terminal.gates;
+      terminal.gates = [...gates].reduce((list, gate) => {
+        if (gate.name.indexOf("{") == -1) {
+          list.push(gate);
+          return list;
+        }
+
+        // "prefix{start..end}suffix"
+        const pattern = gate.name.match(/(.*)?\{(.*)\.\.(.*)\}(.*)?/);
+        const prefix = pattern[1]; // may be undefined, keep leading/trailing spaces
+        const start = pattern[2]; // may have leading 0s, so keep as string
+        const end = pattern[3]; // may have leading 0s
+        const suffix = pattern[4]; // may be undefined, keep leading/trailing spaces
+        const count = Number.parseInt(end) - Number.parseInt(start) + 1;
+        for (let i = 0; i < count; i++) {
+          let digit = `${Number.parseInt(start) + i}`;
+          digit = digit.padStart(start.length, "0");
+          const entry = { ...gate };
+          entry.name = `${prefix || ""}${digit}${suffix || ""}`;
+          list.push(entry);
+        }
+
+        return list;
+      }, []);
+    });
   }
 
   setFlights(flights) {
