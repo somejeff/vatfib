@@ -106,16 +106,16 @@ class VatFib {
   assignTerminalAndGates() {
     this.flights.departures?.forEach((flight) => {
       const selectedTerminal = this.selectTerminal(flight);
-      const selectedGate = selectedTerminal.gates[0];
-      flight.terminal = selectedTerminal.name;
-      flight.gate = selectedGate.name;
+      const selectedGate = this.selectGate(flight, selectedTerminal);
+      flight.terminal = selectedTerminal?.name;
+      flight.gate = selectedGate?.name;
     });
 
     this.flights.arrivals?.forEach((flight) => {
       const selectedTerminal = this.selectTerminal(flight);
       const selectedGate = this.selectGate(flight, selectedTerminal);
-      flight.terminal = selectedTerminal.name;
-      flight.gate = selectedGate.name;
+      flight.terminal = selectedTerminal?.name;
+      flight.gate = selectedGate?.name;
     });
   }
 
@@ -151,10 +151,18 @@ class VatFib {
    * @returns a reproducible gate
    */
   selectGate(flight, terminal) {
+    // no configured gates
+    if (!terminal.gates) {
+      return null;
+    }
     // filter the gate based on constraints of the flight
     const availableGates = terminal.gates.filter((terminal) => {
       return true;
     });
+    // no available gates
+    if (!terminal.gates) {
+      return null;
+    }
     // only 1 terminal?
     if (availableGates.length == 1) {
       return availableGates[0];
