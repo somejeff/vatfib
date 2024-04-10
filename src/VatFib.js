@@ -128,10 +128,17 @@ class VatFib {
    * @returns a reproducible terminal with a gate list
    */
   selectTerminal(flight) {
-    // filter the terminal based on constraints of the flight
-    const availableTerminals = this.config.terminals.filter((terminal) => {
-      return true;
+    // locate the first terminal
+    let availableTerminals = this.config.terminals.filter((terminal) => {
+      // callsign regex exists and doesn't match
+      if (terminal.callsign && terminal.callsign.test(flight.callsign)) {
+        return true;
+      }
     });
+    // no specific terminals? load up general ones
+    if (availableTerminals.length == 0) {
+      availableTerminals = this.config.terminals.filter((terminal) => !terminal.callsign);
+    }
     // only 1 terminal?
     if (availableTerminals.length == 1) {
       return availableTerminals[0];
