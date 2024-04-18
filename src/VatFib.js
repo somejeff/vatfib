@@ -11,6 +11,8 @@ class VatFib {
         {
           // callsign: any
           // aircraft: any
+          // region: any
+
           name: "Main",
           gates: [
             {
@@ -128,24 +130,49 @@ class VatFib {
    * @returns a reproducible terminal with a gate list
    */
   selectTerminal(flight) {
-    // locate the first terminal
-    let availableTerminals = this.config.terminals.filter((terminal) => {
-      // callsign regex exists and doesn't match
-      if (terminal.callsign && terminal.callsign.test(flight.callsign)) {
-        return true;
+    // organize the terminals into best, ok and worse fit
+    let availableTerminals = this.config.terminals.reduce(
+      (result, item) => {
+        // accepts any flight, ok
+        if (item.domestic == undefined && item.callsign == undefined) {
+          result.ok.push(item);
+          return result;
+        }
+        // specific region
+        if (item.domestic !== flight.domestic) {
+          result.worst.push(item);
+          return result;
+        }
+        // any callsign
+        if (item.callsign == undefined) {
+          result.ok.push(item);
+          return result;
+        }
+
+        if (item.callsign.test(flight.callsign)) {
+          result.best.push(item);
+          return result;
+        }
+
+        return result;
+      },
+      {
+        best: [],
+        ok: [],
+        worst: [],
       }
-    });
-    // no specific terminals? load up general ones
-    if (availableTerminals.length == 0) {
-      availableTerminals = this.config.terminals.filter((terminal) => !terminal.callsign);
-    }
-    // only 1 terminal?
-    if (availableTerminals.length == 1) {
-      return availableTerminals[0];
+    );
+    const shortlist = availableTerminals.best.length
+      ? availableTerminals.best
+      : availableTerminals.ok.length
+      ? availableTerminals.ok
+      : availableTerminals.worst;
+    if (shortlist.length == 1) {
+      return shortlist[0];
     }
     // multiple choices, key the flight and pick one
     const flightHash = this.calculateHashNumber(flight);
-    return availableTerminals[flightHash % availableTerminals.length];
+    return shortlist[flightHash % shortlist.length];
   }
 
   /**
@@ -188,7 +215,7 @@ class VatFib {
       return flight.hash;
     }
     // Concatenate the data points into a single string
-    const inputString = `${flight.cid}_${flight.callsign}_${flight.departure}_${flight.departure}_${flight.deptime}_${flight.arrtime}`;
+    const inputString = `${flight.cid}_${flight.callsign}_${flight.departure}_${flight.arrival}_${flight.deptime}_${flight.arrtime}`;
 
     // Convert the input string into a numerical value (simple hash)
     let hash = 0;
