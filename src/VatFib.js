@@ -131,37 +131,7 @@ class VatFib {
    */
   selectTerminal(flight) {
     // organize the terminals into best, ok and worse fit
-    let availableTerminals = this.config.terminals.reduce(
-      (result, item) => {
-        // accepts any flight, ok
-        if (item.domestic == undefined && item.callsign == undefined) {
-          result.ok.push(item);
-          return result;
-        }
-        // specific region
-        if (item.domestic !== flight.domestic) {
-          result.worst.push(item);
-          return result;
-        }
-        // any callsign
-        if (item.callsign == undefined) {
-          result.ok.push(item);
-          return result;
-        }
-
-        if (item.callsign.test(flight.callsign)) {
-          result.best.push(item);
-          return result;
-        }
-
-        return result;
-      },
-      {
-        best: [],
-        ok: [],
-        worst: [],
-      }
-    );
+    let availableTerminals = this.filterCandidates(this.config.terminals,flight)
     const shortlist = availableTerminals.best.length
       ? availableTerminals.best
       : availableTerminals.ok.length
@@ -190,20 +160,53 @@ class VatFib {
       return null;
     }
     // filter the gate based on constraints of the flight
-    const availableGates = terminal.gates.filter((terminal) => {
-      return true;
-    });
-    // no available gates
-    if (!terminal.gates) {
-      return null;
-    }
-    // only 1 terminal?
-    if (availableGates.length == 1) {
-      return availableGates[0];
+    const availableGates = this.filterCandidates(terminal.gates,flight)
+    const shortlist = availableGates.best.length
+      ? availableGates.best
+      : availableGates.ok.length
+      ? availableGates.ok
+      : availableGates.worst;
+      // only 1 terminal?
+    if (shortlist.length == 1) {
+      return shortlist[0];
     }
     // multiple choices, key/reuse the flight and pick one
     const flightHash = this.calculateHashNumber(flight);
-    return availableGates[flightHash % availableGates.length];
+    return shortlist[flightHash % shortlist.length];
+  }
+
+  filterCandidates(list,flight) {
+    return list.reduce(
+      (result, item) => {
+        // accepts any flight, ok
+        if (item.domestic == undefined && item.callsign == undefined) {
+          result.ok.push(item);
+          return result;
+        }
+        // specific region
+        if (item.domestic !== undefined && item.domestic !== flight.domestic) {
+          result.worst.push(item);
+          return result;
+        }
+        // any callsign
+        if (item.callsign == undefined) {
+          result.ok.push(item);
+          return result;
+        }
+
+        if (item.callsign.test(flight.callsign)) {
+          result.best.push(item);
+          return result;
+        }
+
+        return result;
+      },
+      {
+        best: [],
+        ok: [],
+        worst: [],
+      }
+    );
   }
 
   /**
