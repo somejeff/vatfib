@@ -3,6 +3,10 @@
  *
  */
 class VatFib {
+  /**
+   * Builds a new VatFib instance using a given configuration.
+   * @param {object} config 
+   */
   constructor(config) {
     // Default configuration
     this.config = {
@@ -36,6 +40,10 @@ class VatFib {
     };
   }
 
+  /**
+   * Expands ranges in the terminals and gates
+   * @private
+   */
   expandRangedTerminals() {
     this.config.terminals = [...this.config.terminals].reduce(
       (list, terminal) => {
@@ -65,6 +73,10 @@ class VatFib {
     );
   }
 
+  /**
+   * Expands ranges in the gates
+   * @private
+   */
   expandRangedGates() {
     this.config.terminals.forEach((terminal) => {
       // No gates?
@@ -98,11 +110,23 @@ class VatFib {
     });
   }
 
+  /**
+   * Sets the flight data.
+   * 
+   * This assigns terminal and gate names to the flights.
+   *
+   * @param {object} flights
+   */
   setFlights(flights) {
     this.flights = flights;
     this.assignTerminalAndGates();
   }
 
+  /**
+   * Assigns terminal and gate names to the flights.
+   *
+   * @private
+   */
   assignTerminalAndGates() {
     this.flights.departures?.forEach((flight) => {
       const selectedTerminal = this.selectTerminal(flight);
@@ -124,6 +148,7 @@ class VatFib {
    *
    * There may be constraints (e.g. callsign prefix or aircraft types)
    *
+   * @private
    * @param flight
    * @returns a reproducible terminal with a gate list
    */
@@ -152,7 +177,7 @@ class VatFib {
    * Selects an appropriate gate from the passed in terminal for the given flight
    *
    * There may be constraints (e.g. callsign prefix or aircraft types)
-   *
+   * @private
    * @param flight
    * @param terminal containing gates
    * @returns a reproducible gate
@@ -181,6 +206,8 @@ class VatFib {
 
   /**
    * Calculates a reproducible has number based on the characteristics of the flight
+   * @private
+   * @param flight
    */
   calculateHashNumber(flight) {
     // already calculated
