@@ -1,4 +1,4 @@
-const VatFib = require("../VatFib");
+const { VatFib } = require("../VatFib");
 
 describe("Default Terminal and Gate", () => {
   const fib = new VatFib();
