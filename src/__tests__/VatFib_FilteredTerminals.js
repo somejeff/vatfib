@@ -1,4 +1,4 @@
-const VatFib = require("../VatFib");
+const { VatFib } = require("../VatFib");
 
 describe("Filtered Terminals by Callsign", () => {
   const fib = new VatFib({

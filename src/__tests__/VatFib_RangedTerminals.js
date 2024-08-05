@@ -1,4 +1,4 @@
-const VatFib = require("../VatFib");
+const { VatFib } = require("../VatFib");
 
 describe("Terminal Ranges", () => {
   it("should expand the array when a range is provided", () => {
